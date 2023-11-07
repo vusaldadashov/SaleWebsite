@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model List<Product>
+
+<div>
+    <div>
+        <form class="d-flex gap-2 w-50" asp-controller="Home" asp-action="Index" method="get">
+            <input type="search" class="form-control w-50" name="SearchKey" placeholder="Search for item" asp-for=@TempData["SearchKey"] />
+            <button type="submit" class="btn btn-info">Search</button>
+        </form>
+        <form class="d-flex gap-2 rounded border border-1 p-3 mt-2" asp-controller="Home" asp-action="Index" method="get">
+            <div class="w-25">
+                <label class="form-label">Type</label>
+                <select asp-for=@TempData["Type"] class="form-select" name="Type">
+                    <option value="Home">Home</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Laptops and Smartphones">Laptops and Smartphones</option>
+                    <option value="Service">Service</option>
+                </select>
+            </div>
+            <div class="w-25">
+                <label class="form-label">Condition</label>
+                <select asp-for=@TempData["Condition"] class="form-select" name="Condition">
+                    <option value="New">New</option>
+                    <option value="Used like new">Used like new</option>
+                    <option value="used">Used</option>
+                </select>
+            </div>
+            <div class="w-25">
+                <label class="form-label">City</label>
+                <select asp-for=@TempData["City"] class="form-select" name="City">
+                    <option value="Warsaw">Warsaw</option>
+                    <option value="Lodz">Lodz</option>
+                    <option value="Krakow">Krakow</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-warning align-self-end">Filter</button>
+            @if (!string.IsNullOrEmpty(TempData["Type"].ToString()) ||
+            !string.IsNullOrEmpty(TempData["Condition"].ToString()))
+            {
+                <a class="btn btn-danger align-self-end" asp-controller="Home" asp-action="Index">Clear</a>
+
+            }
+        </form>
+    </div>
+    <div class="products mt-5">
+        @foreach (var item in Model)
+        {
+            <a class="product" asp-controller="Home" asp-action="Product" asp-route-Id="@item.Id">
+                <div class="card">
+                    @if (item.Images.Count > 0)
+                    {
+                        <img class="card-img-top product_card_image" src="@item.Images.First().Url" alt="Card image cap">
+                    }
+                    else
+                    {
+                        <img class="card-img-top product_card_image" src="..." alt="Card Image Cap" />
+                    }
+                    <div class="card-body pt-1">
+                        <p class="card-title text-black mt-0 mb-0 ">@item.Title</p>
+                        <p class="card-text fw-bolder">@item.Price $</p>
+                        <div class="d-flex justify-content-between">
+                            <p style="color:dimgrey; font-size: 0.8vw;">@item.CreatedDate.ToString("d")</p>
+                            <p style="color:dimgrey; font-size: 0.8vw;">@item.City , @item.Country</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+</div>

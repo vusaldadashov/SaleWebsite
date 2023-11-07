@@ -1,0 +1,45 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model User
+
+<div>
+    <form asp-controller="Register" asp-action="Signup" method="post">
+        <h2>Sign up</h2>
+        <div>
+            <label class="form-label">Name</label>
+            <input class="form-control" type="text" asp-for="Name" required />
+        </div>
+        <div>
+            <label class="form-label">Surname</label>
+            <input class="form-control" type="text" asp-for="Surname" required />
+        </div>
+        <div>
+            <label class="form-label">Username</label>
+            <input class="form-control" type="text" asp-for="UserName" required />
+        </div>
+        <div>
+            <label class="form-label">Email</label>
+            <input class="form-control" type="email" asp-for="Email" required />
+        </div>
+        <div>
+            <label class="form-label">Phone</label>
+            <input class="form-control" type="text" asp-for="Phone" required />
+        </div>
+        <div>
+            <label class="form-label">Password</label>
+            <input class="form-control" type="password" asp-for="Password" required />
+        </div>
+        <div>
+            <label class="form-label">Confirm Password</label>
+            <input class="form-control" type="password" name="ConfirmPassword" required />
+        </div>
+        <div>
+            <label class="text-danger">@Html.ValidationMessage("Register")</label>
+        </div>
+        <button class="btn btn-outline-info">Sign up</button>
+    </form>
+</div>

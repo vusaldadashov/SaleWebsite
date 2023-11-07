@@ -1,0 +1,78 @@
+﻿@model Product
+
+<div style="width: 70%; margin:auto">
+    <form asp-controller="Account" asp-action="UpdateProduct" enctype="multipart/form-data" asp-route-Id="@Model.Id">
+        <div class="form">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" asp-for="Title" />
+        </div>
+        <div>
+            <label class="form-label">Description</label>
+            <textarea class="form-control" asp-for="Description"></textarea>
+        </div>
+        <div>
+            <label class="form-label">Price</label>
+            <input type="number" class="form-control" asp-for="Price" />
+        </div>
+        <div>
+            <label class="form-label">Condition</label>
+            <select class="form-select" asp-for="Condition">
+                <option>New</option>
+                <option>Used like new</option>
+                <option>Used</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Category</label>
+            <select class="form-select" asp-for="Categories">
+                <option>Home</option>
+                <option>Electronics</option>
+                <option>Laptops and Smartphones</option>
+                <option>Service</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">City</label>
+            <select class="form-select" asp-for="City">
+                <option>Warsaw</option>
+                <option>Lodz</option>
+                <option>Krakow</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Country</label>
+            <select class="form-select" asp-for="Country">
+                <option>Poland</option>
+                <option>Azerbaijan</option>
+                <option>England</option>
+            </select>
+        </div>
+        <div id="edit_product_images" class="mt-2">
+            <h6>Add New Images</h6>
+            <div class="d-flex gap-3 align-items-center">
+                <label for="imagesInput" class="btn btn-outline-secondary">Select Images</label>
+                <p class="text-danger m-0" id="imagesCount"></p>
+                <input asp-for=@Model.Images name="files[]" type="file" id="imagesInput" style="display:none" multiple onchange="imagesInputOnChange()" />
+            </div>
+            <div class="w-100 d-flex gap-1 g-1 flex-wrap mt-2" id="imagesPreview">
+            </div>
+            <input type="hidden" name="ImagesToRemove" id="ImagesToRemove" />
+            <hr />
+            <h6>Already Uploaded Images</h6>
+            <div class="d-flex gap-3 g-1 bg-light flex-wrap" id="image_card_stack">
+                @foreach (var image in Model.Images)
+                {
+                    <div class="d-flex flex-column border rounded" id="image_card_@image.Id">
+                        <img src="@image.Url" alt="Product-Image" id="image_@image.Id" style="height: 10rem" />
+                        <button type="button" class="btn-close close_button mt-2 mb-2" onclick="removeImage(@image.Id)"></button>
+                    </div>
+                }
+            </div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Update</button>
+        <input type="hidden" asp-for="Id" value=@Model.Id />
+        <input type="hidden" asp-for="CreatedDate" value="@Model.CreatedDate" />
+        <a class="btn btn-danger" asp-controller="Account" asp-action="DeleteProduct" asp-route-Id=@Model.Id>Delete Product</a>
+    </form>
+</div>
+

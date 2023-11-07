@@ -1,0 +1,34 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model User
+<div style="width: 70%; margin:auto">
+    <div>
+        <form asp-controller="Account" asp-action="UpdateProfile" method="post" class="d-flex flex-column">
+            <div>
+                <label class="form-label">Name</label>
+                <input class="form-control" type="text" asp-for=@Model.Name value=@Model.Name />
+            </div>
+            <div>
+                <label class="form-label">Surname</label>
+                <input class="form-control" type="text" asp-for=@Model.Surname value=@Model.Surname />
+            </div>
+            <div>
+                <label class="form-label">Username</label>
+                <input class="form-control" type="text" asp-for=@Model.UserName value=@Model.UserName />
+            </div>
+            <div>
+                <label class="form-label">Email</label>
+                <input class="form-control" type="text" asp-for=@Model.Email value=@Model.Email />
+            </div>
+            <div class="d-flex gap-2">
+                <label class="form-label fw-bold">Membership : </label>
+                <label class="form-label text-danger fw-bold"> Basic</label>
+            </div>
+            <a class="text-primary text-decoration-none" asp-controller="Register" asp-action="ResetPassword" asp-rout-Id="1">Reset Password</a>
+            <button class="btn btn-warning w-25 mt-2 mb-2">Save Changes</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+﻿@model Product
+
+<div style="width: 70%; margin:auto">
+    <form asp-controller="Account" asp-action="UploadProduct" enctype="multipart/form-data">
+        <div class="form">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" asp-for="Title" />
+        </div>
+        <div>
+            <label class="form-label">Description</label>
+            <textarea class="form-control" asp-for="Description"></textarea>
+        </div>
+        <div>
+            <label class="form-label">Price</label>
+            <input type="number" class="form-control" asp-for="Price"/>
+        </div>
+        <div>
+            <label class="form-label">Condition</label>
+            <select class="form-select" asp-for="Condition"  >
+                <option>New</option>
+                <option>Used like new</option>
+                <option>Used</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Category</label>
+            <select class="form-select" asp-for="Categories">
+                <option>Home</option>
+                <option>Electronics</option>
+                <option>Laptops and Smartphones</option>
+                <option>Service</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">City</label>
+            <select class="form-select" asp-for="City">
+                <option>Warsaw</option>
+                <option>Lodz</option>
+                <option>Krakow</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Country</label>
+            <select class="form-select" asp-for="Country">
+                <option>Poland</option>
+                <option>Azerbaijan</option>
+                <option>England</option>
+            </select>
+        </div>
+        <div class="mt-3 bg-light text-white rounded pt-2">
+            <div class="d-flex gap-3 align-items-center">
+                <label for="imagesInput" class="btn btn-outline-secondary">Select Images</label>
+                <p class="text-danger m-0" id="imagesCount"></p>
+                <input type="file" name="files[]" id="imagesInput" style="display:none" multiple onchange="imagesInputOnChange()" />
+            </div>
+            <div class="w-100 d-flex gap-2 g-2 flex-wrap mt-2" id="imagesPreview">
+
+            </div>
+        </div>
+        <button type="submit"  class="btn btn-outline-primary">Create</button>
+    </form>
+</div>
