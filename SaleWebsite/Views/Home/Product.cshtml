@@ -10,7 +10,14 @@
     <div style="width: 60%;">
         <div class="w-100">
             <div class="position-relative d-flex h-100">
-                <img class="w-100" id="PosterImg" src="@Model.Images.First().Url" />
+                @if(Model.Images.Count > 0) {
+                    <img class="w-100" id="PosterImg" src="@Model.Images.First().Url" />
+                }
+                else
+                {
+                    <img class="w-100" id="PosterImg" src="~/imgs/empty.jpg" />
+
+                }
                 <button onclick="slideButtonHandler(-1)" class="slide_button top-50" id="slide_button_prev">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
@@ -24,17 +31,16 @@
             </div>
         </div>
         <div class="d-flex w-100 gap-1 bg-secondary p-1 flex-wrap">
-            @for(int i=0; i< Model.Images.Count;i++)
+            @for (int i = 0; i < Model.Images.Count; i++)
             {
-                <img class="imgs-small" 
-                style="height: 4rem" 
-                src=@Model.Images.ElementAt(i).Url 
-                onclick="setPosterUrl(@i)" 
-                />
+                <img class="imgs-small"
+                     style="height: 4rem"
+                     src=@Model.Images.ElementAt(i).Url
+                     onclick="setPosterUrl(@i)" />
             }
         </div>
         <hr />
-        <div >
+        <div>
             <div>
                 <div class="d-flex gap-5">
                     <p class="w-50 d-flex justify-content-between">City <strong>@Model.City</strong></p>
@@ -64,8 +70,11 @@
                 <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12z" />
             </svg>
             <div>
-                <p class="p-0 m-0">@Model.User.Name @Model.User.Surname</p>
-                <a href="#">All Details of User</a>
+                @if (Model.User != null)
+                {
+                    <p class="p-0 m-0">@Model.User.Name @Model.User.Surname</p>
+                    <a href="#">All Details of User</a>
+                }
             </div>
 
         </div>
@@ -76,17 +85,26 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="white" class="bi bi-telephone-fill" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z" />
                 </svg>
-                <span style="font-size: 1.2vw; margin-left: 0.7vw;">@Model.User.Phone</span>
+                @if(Model.User != null)
+                {
+                    <span style="font-size: 1.2vw; margin-left: 0.7vw;">@Model.User.Phone</span>    
+                }
             </p>
         </div>
-        <div class="d-flex bg-primary rounded-3 pt-4 pb-4 justify-content-center mt-3">
-            <p class="text-white fw-bold p-0 m-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-chat-left-dots" viewBox="0 0 16 16">
-                    <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
-                    <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-                </svg>
-                <span style="font-size: 1.2vw; margin-left: 0.7vw;">Send Message</span>
-            </p>
+        <div class="mt-3">
+            <form asp-controller="Account" asp-action="AddChatUser" method="post" >
+                <button class="btn btn-primary rounded-3 pt-4 pb-4 d-flex w-100 justify-content-center " type="submit">
+                    <p class="text-white fw-bold p-0 m-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-chat-left-dots" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                            <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                        </svg>
+                        <span style="font-size: 1.2vw; margin-left: 0.7vw;">Send Message</span>
+                    </p>
+                </button>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserId" />
+            </form>
         </div>
     </div>
 </div>

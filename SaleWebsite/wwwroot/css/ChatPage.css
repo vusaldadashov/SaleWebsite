@@ -1,0 +1,12 @@
+﻿body {
+    height: 100vh;
+    overflow-y: hidden;
+    overflow: hidden;
+}
+#website_header{
+    display: none;
+}
+
+#website_footer {
+    display:none;
+}

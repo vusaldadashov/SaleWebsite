@@ -9,12 +9,14 @@ public class HomeController : Controller
 {
     #region Class Properties
     private readonly DataContext _dataContext;
+
     #endregion
 
     #region Class Constructor
     public HomeController(DataContext dataContext)
     {
         _dataContext = dataContext;
+
     }
 
     #endregion
@@ -30,22 +32,12 @@ public class HomeController : Controller
         string City = Request.Query["City"].ToString();
         var products = _dataContext.Products.AsQueryable();
         var productsList = new List<Product>();
-        if (!string.IsNullOrEmpty(SearchKey))
-        {
-            products = products.Where(x => x.Title.Contains(SearchKey));
-        }
-        if (!string.IsNullOrEmpty(Type))
-        {
-            products = products.Where(x => x.Categories == Type);
-        }
-        if (!string.IsNullOrEmpty(Condition))
-        {
-            products = products.Where(x => x.Condition == Condition);
-        }
-        if (!string.IsNullOrEmpty(City))
-        {
-            products = products.Where(x => x.City == City);
-        }
+        products = products
+            .Where(x => string.IsNullOrEmpty(SearchKey) || x.Title.Contains(SearchKey))
+            .Where(x => string.IsNullOrEmpty(Type) || x.Categories == Type)
+            .Where(x => string.IsNullOrEmpty(Condition) || x.Condition == Condition)
+            .Where(x => string.IsNullOrEmpty(City) || x.City == City);
+
 
         productsList = await products
             .Include(x => x.Images)
@@ -55,6 +47,7 @@ public class HomeController : Controller
         TempData["Type"] = Type;
         TempData["Condition"] = Condition;
         TempData["City"] = City;
+
         return View(productsList);
     }
 
@@ -65,8 +58,13 @@ public class HomeController : Controller
     {
         var product = _dataContext.Products
             .Include(x => x.Images)
-            .Include(x=> x.User)
-            .FirstOrDefault(x => x.Id == Int32.Parse(Id));
+            .Include(x => x.User)
+            .FirstOrDefault(x => x.Id == int.Parse(Id));
+
+        if (product == null || product.User == null)
+        {
+            return RedirectToAction("Index");
+        }
         return View(product);
     }
 

@@ -85,3 +85,18 @@ body {
     height: 3vw;
     width: 95%;
 }
+
+.loading-indicator {
+    /* Add styles to center the loading indicator and make it visually appealing */
+    position: fixed;
+    top: 50%;
+    left: 70%;
+    transform: translate(-70%, -50%);
+}
+
+.circular-container {
+    width: 100px; /* Adjust the size of the container as needed */
+    height: 100px;
+    overflow: hidden;
+    border-radius: 50%;
+}

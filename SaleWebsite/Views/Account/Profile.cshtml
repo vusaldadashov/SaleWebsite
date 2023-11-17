@@ -6,7 +6,7 @@
 @model User
 <div style="width: 70%; margin:auto">
     <div>
-        <form asp-controller="Account" asp-action="UpdateProfile" method="post" class="d-flex flex-column">
+        <form asp-controller="Account" asp-action="UpdateProfile" method="post" class="d-flex flex-column" enctype="multipart/form-data">
             <div>
                 <label class="form-label">Name</label>
                 <input class="form-control" type="text" asp-for=@Model.Name value=@Model.Name />
@@ -27,8 +27,16 @@
                 <label class="form-label fw-bold">Membership : </label>
                 <label class="form-label text-danger fw-bold"> Basic</label>
             </div>
+            <div>
+                <img src="@Model.Img" class="w-25"  />
+                <label for="fileUpload">Add Profile Photo</label>
+                <input type="file" asp-for="Img" name="Img" id="fileUpload"/>
+            </div>
             <a class="text-primary text-decoration-none" asp-controller="Register" asp-action="ResetPassword" asp-rout-Id="1">Reset Password</a>
             <button class="btn btn-warning w-25 mt-2 mb-2">Save Changes</button>
         </form>
     </div>
 </div>
+<script>
+
+</script>

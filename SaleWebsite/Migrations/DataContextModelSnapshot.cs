@@ -22,6 +22,34 @@ namespace SaleWebsite.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ChatUser", b =>
+                {
+                    b.Property<int>("ChatsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ParticipantsUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ChatsId", "ParticipantsUserId");
+
+                    b.HasIndex("ParticipantsUserId");
+
+                    b.ToTable("UserChat", (string)null);
+                });
+
+            modelBuilder.Entity("SaleWebsite.Models.Chat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Chats");
+                });
+
             modelBuilder.Entity("SaleWebsite.Models.ChatMessage", b =>
                 {
                     b.Property<int>("Id")
@@ -30,7 +58,10 @@ namespace SaleWebsite.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Content")
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -43,12 +74,17 @@ namespace SaleWebsite.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("ViewStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("ChatMessages");
                 });
@@ -73,26 +109,6 @@ namespace SaleWebsite.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("Images");
-                });
-
-            modelBuilder.Entity("SaleWebsite.Models.Membership", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Memberships");
                 });
 
             modelBuilder.Entity("SaleWebsite.Models.Product", b =>
@@ -145,21 +161,22 @@ namespace SaleWebsite.Migrations
 
             modelBuilder.Entity("SaleWebsite.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Img")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("MembershipId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -182,22 +199,51 @@ namespace SaleWebsite.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("MembershipId");
+                    b.HasKey("UserId");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("SaleWebsite.Models.ChatMessage", b =>
+            modelBuilder.Entity("ChatUser", b =>
                 {
-                    b.HasOne("SaleWebsite.Models.User", "User")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("UserId")
+                    b.HasOne("SaleWebsite.Models.Chat", null)
+                        .WithMany()
+                        .HasForeignKey("ChatsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("SaleWebsite.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipantsUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SaleWebsite.Models.ChatMessage", b =>
+                {
+                    b.HasOne("SaleWebsite.Models.Chat", "Chat")
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SaleWebsite.Models.User", "Receiver")
+                        .WithMany("ReceiveMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SaleWebsite.Models.User", "Sender")
+                        .WithMany("SendMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("SaleWebsite.Models.Image", b =>
@@ -222,13 +268,9 @@ namespace SaleWebsite.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SaleWebsite.Models.User", b =>
+            modelBuilder.Entity("SaleWebsite.Models.Chat", b =>
                 {
-                    b.HasOne("SaleWebsite.Models.Membership", "Membership")
-                        .WithMany()
-                        .HasForeignKey("MembershipId");
-
-                    b.Navigation("Membership");
+                    b.Navigation("ChatMessages");
                 });
 
             modelBuilder.Entity("SaleWebsite.Models.Product", b =>
@@ -238,9 +280,11 @@ namespace SaleWebsite.Migrations
 
             modelBuilder.Entity("SaleWebsite.Models.User", b =>
                 {
-                    b.Navigation("ChatMessages");
-
                     b.Navigation("Products");
+
+                    b.Navigation("ReceiveMessages");
+
+                    b.Navigation("SendMessages");
                 });
 #pragma warning restore 612, 618
         }

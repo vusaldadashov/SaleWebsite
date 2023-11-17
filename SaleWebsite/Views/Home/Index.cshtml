@@ -37,8 +37,7 @@
             </div>
 
             <button type="submit" class="btn btn-warning align-self-end">Filter</button>
-            @if (!string.IsNullOrEmpty(TempData["Type"].ToString()) ||
-            !string.IsNullOrEmpty(TempData["Condition"].ToString()))
+            @if (TempData["Type"] != null  || TempData["Condition"] != null)
             {
                 <a class="btn btn-danger align-self-end" asp-controller="Home" asp-action="Index">Clear</a>
 
@@ -56,7 +55,7 @@
                     }
                     else
                     {
-                        <img class="card-img-top product_card_image" src="..." alt="Card Image Cap" />
+                        <img class="card-img-top product_card_image" src="~/imgs/empty.jpg" alt="Card Image Cap" />
                     }
                     <div class="card-body pt-1">
                         <p class="card-title text-black mt-0 mb-0 ">@item.Title</p>

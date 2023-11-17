@@ -4,14 +4,18 @@ using SaleWebsite;
 using SaleWebsite.Hubs;
 using SaleWebsite.Interfaces;
 using SaleWebsite.PasswordHasher;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 
-builder.Services.AddDbContext<DataContext>( opt =>
+builder.Services.AddDbContext<DataContext>(opt =>
     {
         var ConStr = "SaleWebsiteDB";
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
@@ -21,13 +25,9 @@ builder.Services.AddDbContext<DataContext>( opt =>
         opt.UseSqlServer(builder.Configuration.GetConnectionString(ConStr));
     });
 
-
-//builder.Services.BuildServiceProvider().GetService<DataContext>().Database.Migrate();
-
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
-
+//builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddDistributedMemoryCache();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSession(options =>
 {
@@ -53,7 +53,7 @@ app.UseStaticFiles();
 
 app.UseSession();
 
-app.UseAuthentication();
+//app.UseAuthentication();
 
 app.UseAuthorization();
 

@@ -2,8 +2,9 @@
 
 @{
     bool isLoggedIn = Context.Session.GetObjectFromJson<bool>("isLoggedIn");
-    var user = Context.Session.GetObjectFromJson<User>("user");   
+    var user = Context.Session.GetObjectFromJson<User>("user");
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
     <link rel="stylesheet" href="~/SaleWebsite.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header style="width: 65%; margin:auto;">
+    <header style="width: 65%; margin:auto;" id="website_header">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SaleWebsite</a>
@@ -28,13 +29,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @if(isLoggedIn && user != null)
+                        @if (isLoggedIn)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="CreateProduct">Sell Product</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Profile">@user.Email</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Profile">@user.Email </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Products">Your Products</a>
@@ -45,7 +46,6 @@
                             <li class="nav-item">
                                 <a class="nav-link text-danger" asp-area="" asp-controller="Account" asp-action="ChatPage">Chat</a>
                             </li>
-
                         }
                         else {
                             <li class="nav-item">
@@ -55,7 +55,6 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Register" asp-action="Signup">Signup</a>
                         </li>
                         }
-                        
                     </ul>
                 </div>
             </div>
@@ -67,7 +66,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted" id="website_footer">
         <div class="container">
             &copy; 2023 - SaleWebsite - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>

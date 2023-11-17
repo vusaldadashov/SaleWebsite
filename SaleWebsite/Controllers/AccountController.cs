@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using SaleWebsite.Models;
 using SaleWebsite.Session_Extensions;
 using System.Diagnostics;
-using System.Xml.Linq;
 using SaleWebsite.Helper_Functions;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
+using Microsoft.CodeAnalysis.FlowAnalysis.DataFlow;
 
 namespace SaleWebsite.Controllers;
 public class AccountController : Controller
@@ -17,6 +17,7 @@ public class AccountController : Controller
     #endregion
 
     #region Class Constructor
+
     public AccountController(DataContext dataContext, IWebHostEnvironment environment)
     {
         _dataContext = dataContext;
@@ -44,10 +45,20 @@ public class AccountController : Controller
         userProfile.UserName = user.UserName;
         userProfile.Email = user.Email;
 
-        HttpContext.Session.SetObjectAsJson("user", userProfile);
+        var file = Request.Form.Files[0];
 
+        var fileName = Path.GetRandomFileName() + file.FileName.ToLower(); // Generate a unique filename
+        var uploadPath = Path.Combine(_environment.WebRootPath, "imgs/user", fileName);
+        using (var stream = new FileStream(uploadPath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+        var imgUrl = "/imgs/user/" + fileName;
+        userProfile.Img = imgUrl;
+        HttpContext.Session.SetObjectAsJson("user", userProfile);
         _dataContext.Users.Update(userProfile);
         await _dataContext.SaveChangesAsync();
+
         return RedirectToAction("Profile");
     }
 
@@ -63,7 +74,7 @@ public class AccountController : Controller
         }
         var products = await _dataContext.Products
             .Include(x => x.Images)
-            .Where(x => x.UserId == user.Id)
+            .Where(x => x.UserId == user.UserId)
             .ToListAsync();
         return View(products);
     }
@@ -109,7 +120,7 @@ public class AccountController : Controller
                 return RedirectToAction("Login", "Register");
             }
 
-            product.UserId = user.Id;
+            product.UserId = user.UserId;
 
 
             // Remove selected images
@@ -147,7 +158,7 @@ public class AccountController : Controller
             //Store new images 
             var files = Request.Form.Files;
             var result = await StoreProductImages(files, UpdatedProduct.Id);
-            if(result)
+            if (result)
             {
                 await _dataContext.SaveChangesAsync();
             }
@@ -195,7 +206,7 @@ public class AccountController : Controller
             return RedirectToAction("Login", "Register");
         }
 
-        product.UserId = user.Id;
+        product.UserId = user.UserId;
         using var transaction = _dataContext.Database.BeginTransaction();
 
         try
@@ -207,7 +218,7 @@ public class AccountController : Controller
             var Files = Request.Form.Files;
             var result = await StoreProductImages(Files, product.Id);
 
-            if(!result)
+            if (!result)
             {
                 NotFound(product.Id);
             }
@@ -240,7 +251,7 @@ public class AccountController : Controller
         }
         foreach (var image in product.Images)
         {
-            FileSystemForImages.RemoveImageFromLocal(_environment.WebRootPath,image);
+            FileSystemForImages.RemoveImageFromLocal(_environment.WebRootPath, image);
         }
         _dataContext.Products.Remove(product);
         _dataContext.SaveChanges();
@@ -252,13 +263,62 @@ public class AccountController : Controller
     #region Chat Page 
 
     [HttpGet]
-    public IActionResult ChatPage ()
+    public IActionResult ChatPage()
     {
         return View();
     }
 
     #endregion
 
+    #region Add Chat User to chat
+    [HttpPost]
+
+    public async Task<IActionResult> AddChatUser(int Id, int UserId)
+    {
+        var sessionUser = HttpContext.Session.GetObjectFromJson<User>("user");
+        if(sessionUser == null)
+        {
+            HttpContext.Session.SetString("product_to_show", Id.ToString());
+            return RedirectToAction("Login", "Register");
+        }
+        var user1 = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserId == sessionUser.UserId);
+        var user2 = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserId.Equals(UserId));
+
+
+
+        if (user2 == null || user1 == null )
+        {
+            return RedirectToAction("Product", "Home", new { id = Id });
+        }
+        
+        var existChat = await  _dataContext.Chats
+            .FirstOrDefaultAsync(c => c.Participants.Any(p=> p.UserId == user1.UserId) &&
+                                       c.Participants.Any(p=> p.UserId == user2.UserId));
+        
+        if (existChat == null)
+            try
+            {
+
+                Chat chat = new();
+                chat.Participants.Add(user1);
+                chat.Participants.Add(user2);
+
+                _dataContext.Chats.Add(chat);
+
+                await _dataContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("-------------------->>>>>>>>>>>" + ex.Message);
+                Debug.WriteLine("|Error occured - AccountControl->ChatPage Post -> Try catch block|" + ex.InnerException?.Message);
+                Debug.Write("sessionuser: " + user1.Name);
+                Debug.Write("newuser: " + user2.Name);
+            }
+
+        return RedirectToAction("ChatPage", "Account");
+    }
+
+    #endregion
 
 
     #region Store Product Images Method
@@ -296,12 +356,12 @@ public class AccountController : Controller
             }
             return true;
         }
-        catch(Exception ex) 
-        { 
+        catch (Exception ex)
+        {
             NotFound(ex);
             return false;
         }
-        
+
     }
 
     #endregion

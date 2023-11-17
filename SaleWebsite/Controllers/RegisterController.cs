@@ -14,6 +14,7 @@ public class RegisterController : Controller
 
     private readonly DataContext _dataContext;
     private readonly IPasswordHasher _passwordHasher;
+   
 
     #endregion
 
@@ -53,7 +54,18 @@ public class RegisterController : Controller
         {
             HttpContext.Session.SetObjectAsJson("user", user);
             HttpContext.Session.SetObjectAsJson("isLoggedIn", true);
-            return RedirectToAction("Index", "Home");
+
+            // Redirect to a secure area of your application
+            var prodId = HttpContext.Session.GetString("product_to_show");
+            Debug.WriteLine("this is prodid" + prodId);
+            if (string.IsNullOrEmpty(prodId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                return RedirectToAction("Product", "Home", new { id = prodId });
+            }
         }
         else
         {
@@ -63,7 +75,7 @@ public class RegisterController : Controller
 
     }
     #endregion
-
+    
     #region Logout User 
     public IActionResult Logout()
     {
@@ -87,20 +99,20 @@ public class RegisterController : Controller
     [HttpPost]
     [AllowAnonymous]
     [PreventLoggedInAccess]
-    public async  Task<IActionResult> Signup(User user)
+    public async Task<IActionResult> Signup(User newUser)
     {
         if (HttpContext.Session.GetObjectFromJson<bool>("isLoggedIn"))
         {
             return RedirectToAction("Index", "Home");
         }
-        if(_dataContext.Users.FirstOrDefault(user => user.Id == user.Id) != null)
+        if (_dataContext.Users.FirstOrDefault(user => user.Email == newUser.Email) != null)
         {
             ModelState.AddModelError("Register", "This email is used by someone!");
             return View(new User());
         }
 
-        user.Password = _passwordHasher.Hash(user.Password);
-        await _dataContext.Users.AddAsync(user);
+        newUser.Password = _passwordHasher.Hash(newUser.Password);
+        await _dataContext.Users.AddAsync(newUser);
         await _dataContext.SaveChangesAsync();
 
         return RedirectToAction("Index", "Home");
@@ -151,22 +163,17 @@ public class RegisterController : Controller
 
 #region Prevention Class For Access Block
 
-internal class PreventLoggedInAccessAttribute : ActionFilterAttribute
+
+public class PreventLoggedInAccessAttribute : ActionFilterAttribute
 {
-    public override void OnActionExecuted(ActionExecutedContext context)
+    public override void OnActionExecuting(ActionExecutingContext context)
     {
-        
-        if(context.HttpContext.Session.GetObjectFromJson<bool>("isLoggedIn"))
+        if (context.HttpContext.Session.GetObjectFromJson<bool>("isLoggedIn") == true)
         {
             context.Result = new RedirectResult("/Home/Index");
         }
-        /*
-        if (context.HttpContext.User.Identity.IsAuthenticated)
-        {
-            context.Result = new RedirectResult("/Home/Index");
-        }
-        */
     }
 }
+
 
 #endregion
