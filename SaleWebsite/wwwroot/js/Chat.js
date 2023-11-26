@@ -7,6 +7,7 @@ var user = null;
 var chat = null;
 var receiver = null;
 var chatDisplayed = false;
+var selectedChat = 0;
 connection.start()
 
 function sendMessage() {
@@ -24,16 +25,17 @@ connection.on("ReceiveMessage", (_chatMessage) => {
     else {
         connection.invoke("GetRecipients");
     }
-    
 })
 
 connection.on("GetRecipients", (_user) => {
     user = _user;
     ChatRecipientList.innerHTML = ''
+
     for (const _chat of user.chats) {
-        createRecipientItem(_chat)
+        let active = "white"
+        if (_chat.id == selectedChat) active = "#eee"
+        createRecipientItem(_chat, active)
     }
-    
 })
 
 connection.on("GetMessages", (_chat) => {
@@ -56,8 +58,13 @@ function getChatMessages(_chatId) {
     }
     connection.invoke("GetMessages", _chatId);
     receiver = user.chats.find(x => x.id === _chatId).participants[0];
+    selectedChat = _chatId;
 }
-
+setInterval(() => {
+    if (receiver != null) {
+        connection.invoke("GetMessages", selectedChat)
+    }
+}, 60000)
 
 function sendMessageKeyHandler(event) {
     if (event.key === "Enter") sendMessage();   
@@ -67,8 +74,8 @@ function sendMessageKeyHandler(event) {
 function appendUserChat() {
     
     let divElement = document.createElement("div");
-    divElement.classList.add("w-100", "d-flex", "gap-2", "border-start");
-    divElement.style.backgroundColor = "#f0f0f0";
+    divElement.classList.add("w-100", "d-flex", "gap-2", "border-start", "pt-2");
+    divElement.style.backgroundColor = "#229ED9";
 
     // Create an img element with the specified attributes
     let imgElement = document.createElement("img");
@@ -83,7 +90,7 @@ function appendUserChat() {
 
     // Create a p element with the class "text-black" and text content
     let pElement = document.createElement("p");
-    pElement.classList.add("text-black");
+    pElement.classList.add("text-white");
     pElement.textContent = receiver.name + " " + receiver.surname;
 
     // Append the img and p elements to the div element
@@ -99,7 +106,7 @@ function createListItem(msg) {
     const li = document.createElement('li');
     li.className = 'd-flex mb-4 gap-2 align-items-center';
     if (msg.senderId == user.userId) li.classList.add("align-self-end");
-    li.style.minWidth = "50%";
+    
     li.style.width = "fit-content"
     // Create an image element
     const img = document.createElement('img');
@@ -109,16 +116,16 @@ function createListItem(msg) {
     img.alt = 'avatar';
     img.className = 'rounded-circle d-flex shadow-1-strong object-fit-cover';
     img.width = '60';
-    img.height = '60'
+    img.height = '60';
 
     // Create a card element
     const card = document.createElement('div');
-    card.className = 'card';
+    card.classList.add('card','rounded-lg')
     
 
     // Create a card header element
     const cardHeader = document.createElement('div');
-    cardHeader.className = 'card-header d-flex align-items-center gap-2';
+    cardHeader.className = 'card-header d-flex align-items-center gap-2 bg-white p-3';
 
     // Create a name paragraph element
     const nameParagraph = document.createElement('p');
@@ -132,10 +139,7 @@ function createListItem(msg) {
     // Create a time paragraph element
     const timeParagraph = document.createElement('p');
     timeParagraph.className = 'text-muted small m-0';
-    const time = new Date(msg.timestamp)
-    const date = time.toLocaleDateString('en', { day: '2-digit', month: 'long', year: 'numeric' });
-    const clock = time.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-    timeParagraph.innerHTML = `<i class="far fa-clock"></i>${date}  ${clock}`;
+    timeParagraph.textContent = formatTimeDifference(msg.timestamp);
 
     // Append name and time paragraphs to the card header
     cardHeader.appendChild(nameParagraph);
@@ -143,7 +147,7 @@ function createListItem(msg) {
 
     // Create a card body element
     const cardBody = document.createElement('div');
-    cardBody.className = 'card-body p-2';
+    cardBody.className = 'card-body p-3';
 
     // Create a content paragraph element
     const contentParagraph = document.createElement('p');
@@ -168,12 +172,12 @@ function createListItem(msg) {
     ChatMessagesList.appendChild(li)
 }
 
-function createRecipientItem(_chat) {
-    
+function createRecipientItem(_chat, _active) {
+    console.log(_chat)
     // Create li element
     var listItem = document.createElement('li');
-    listItem.classList.add('p-2', 'border-bottom');
-    listItem.style.backgroundColor = '#eee';
+    listItem.classList.add('p-2', 'border-bottom', 'rounded');
+    listItem.style.backgroundColor = _active;
     listItem.setAttribute("onclick", `getChatMessages(${_chat.id})`)
 
     // Create anchor element
@@ -205,10 +209,13 @@ function createRecipientItem(_chat) {
     //nameParagraph.textContent = _recipient.name + " " + _recipient.surname;
     nameParagraph.textContent = _chat.participants[0].name + " " + _chat.participants[0].surname;
 
-
+    //create last message label
+    let messageParagraph = document.createElement('p')
+    messageParagraph.classList.add('small', 'text-muted')
+    if (_chat.lastMessage != null) messageParagraph.textContent = _chat.lastMessage.message
     // Append name and message paragraphs to the second div
     secondDiv.appendChild(nameParagraph);
-
+    if (_chat.lastMessage != null)  secondDiv.appendChild(messageParagraph);
     // Append image and second div to the first div
     firstDiv.appendChild(imageElement);
     firstDiv.appendChild(secondDiv);
@@ -218,9 +225,9 @@ function createRecipientItem(_chat) {
     thirdDiv.classList.add('pt-1');
 
     // Create time paragraph element
-    //var timeParagraph = document.createElement('p');
-    //timeParagraph.classList.add('small', 'text-muted', 'mb-1');
-    //timeParagraph.textContent = 'Just now';
+    var timeParagraph = document.createElement('p');
+    timeParagraph.classList.add('small', 'text-muted', 'mb-1');
+    if (_chat.lastMessage != null) timeParagraph.textContent = formatTimeDifference(_chat.lastMessage.timestamp);
 
     // Create badge span element
     var badgeSpan = document.createElement('span');
@@ -228,7 +235,7 @@ function createRecipientItem(_chat) {
     badgeSpan.textContent = _chat.unreadMessagesCount;
 
     // Append time paragraph and badge span to the third div
-    //thirdDiv.appendChild(timeParagraph);
+    if (_chat.lastMessage != null) thirdDiv.appendChild(timeParagraph);
     if (_chat.unreadMessagesCount > 0) thirdDiv.appendChild(badgeSpan);
 
     // Append the first div and third div to the anchor element
@@ -242,4 +249,40 @@ function createRecipientItem(_chat) {
      // Replace 'yourParentNodeId' with the actual ID of your parent node
     ChatRecipientList.appendChild(listItem);
 
+}
+
+
+function formatTimeDifference(timestamp) {
+    const now = new Date();
+    const messageTime = new Date(timestamp);
+
+    // Calculate the time difference in milliseconds
+    const timeDifference = now - messageTime;
+
+    // Convert milliseconds to seconds
+    const seconds = Math.floor(timeDifference / 1000);
+
+    // Define time intervals
+    const minute = 60;
+    const hour = minute * 60;
+    const day = hour * 24;
+
+    // Determine the appropriate time format
+    if (seconds < minute) {
+        return 'Just now';
+    } else if (seconds < hour) {
+        const minutes = Math.floor(seconds / minute);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (seconds < day) {
+        const hours = Math.floor(seconds / hour);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (messageTime.toDateString() === now.toDateString()) {
+        return 'Today';
+    } else if (messageTime.toDateString() === new Date(now - day).toDateString()) {
+        return 'Yesterday';
+    } else {
+        // For messages older than yesterday, you can customize the display further
+        const days = Math.floor(seconds / day);
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
 }

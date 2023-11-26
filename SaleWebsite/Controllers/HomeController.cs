@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SaleWebsite.Models;
 using SaleWebsite.Session_Extensions;
 using System.Diagnostics;
+using static NuGet.Packaging.PackagingConstants;
 
 namespace SaleWebsite.Controllers;
 public class HomeController : Controller
@@ -21,34 +22,53 @@ public class HomeController : Controller
 
     #endregion
 
-    [HttpGet]
-
     #region Home Page - Index
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        string SearchKey = Request.Query["SearchKey"].ToString();
-        string Type = Request.Query["Type"].ToString();
-        string Condition = Request.Query["Condition"].ToString();
-        string City = Request.Query["City"].ToString();
-        var products = _dataContext.Products.AsQueryable();
-        var productsList = new List<Product>();
-        products = products
-            .Where(x => string.IsNullOrEmpty(SearchKey) || x.Title.Contains(SearchKey))
-            .Where(x => string.IsNullOrEmpty(Type) || x.Categories == Type)
-            .Where(x => string.IsNullOrEmpty(Condition) || x.Condition == Condition)
-            .Where(x => string.IsNullOrEmpty(City) || x.City == City);
+        var Products = _dataContext.Products
+            .Include(p => p.Images)
+            .Include(p => p.Premiums)
+            .Include(p => p.User)
+                .ThenInclude(u => u.Vips)
+            .AsSplitQuery()
+            .AsQueryable();
 
+        FilterViewModel filters = new();
+        if (Request.Method == "POST")
+        {
+            filters.SearchKey = Request.Form["SearchKey"].ToString() ?? "";
+            filters.Type = Request.Form["Type"].ToString();
+            filters.Condition = Request.Form["Condition"].ToString();
+            filters.City = Request.Form["City"].ToString();
+            filters.Category = Request.Form["Category"].ToString();
+            Products = Products
+        .Where(x => string.IsNullOrEmpty(filters.SearchKey) || x.Title.Contains(filters.SearchKey))
+        .Where(x => filters.Type == "All" || string.IsNullOrEmpty(filters.Type) || x.Categories == filters.Type)
+        .Where(x => filters.Condition == "All" || string.IsNullOrEmpty(filters.Condition) || x.Condition == filters.Condition)
+        .Where(x => filters.City == "All" || string.IsNullOrEmpty(filters.City) || x.City == filters.City);
+        }
+        DateTime currentDate = DateTime.Now;
+        var vipProducts = Products
+            .Where(p=> p.User.Vips.Any())
+            .OrderByDescending(x => x.Id)
+            .Take(20)
+            .ToList();
 
-        productsList = await products
-            .Include(x => x.Images)
-            .ToListAsync();
+        var latestProducts = Products
+            .Where(p => !p.Premiums.Any())
+            .OrderByDescending(p => p.CreatedDate)
+            .Take(20)
+            .ToList();
 
-        TempData["SearchKey"] = SearchKey;
-        TempData["Type"] = Type;
-        TempData["Condition"] = Condition;
-        TempData["City"] = City;
+        var premiumProducts = Products
+            .Where(p => p.Premiums.Any())
+            .OrderByDescending(x => x.Id)
+            .Take(50)
+            .ToList();
 
-        return View(productsList);
+        var model = (Filter: filters, VipProducts: vipProducts, LatestProducts: latestProducts, PremiumProducts: premiumProducts);
+
+        return View(model);
     }
 
     #endregion

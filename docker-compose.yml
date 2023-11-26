@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  salewebsite:
+    image: ${DOCKER_REGISTRY-}salewebsite
+    build:
+      context: .
+      dockerfile: SaleWebsite/Dockerfile
+    environment:
+      DB_HOST: "mssqlserver"
+      DB_NAME: "SaleWebsiteDB"
+      SA_Password: "Vusal@12345"
+    ports:
+        - "8080:80"
+    depends_on:
+        - appdb
+
+  appdb:
+    container_name: mssqlserver
+    image: mcr.microsoft.com/mssql/server:2019-CU14-ubuntu-20.04
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Vusal@12345"
+    ports:
+      - "1433:1433"
+

@@ -12,7 +12,7 @@ using SaleWebsite;
 namespace SaleWebsite.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231115224932_InitMigration")]
+    [Migration("20231126115026_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -114,6 +114,31 @@ namespace SaleWebsite.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("SaleWebsite.Models.Premium", b =>
+                {
+                    b.Property<int>("PremiumId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PremiumId"));
+
+                    b.Property<string>("Option")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PremiumId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Premiums");
+                });
+
             modelBuilder.Entity("SaleWebsite.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -178,8 +203,8 @@ namespace SaleWebsite.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("bit");
+                    b.Property<int>("IsAdmin")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -205,6 +230,31 @@ namespace SaleWebsite.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SaleWebsite.Models.Vip", b =>
+                {
+                    b.Property<int>("VipId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VipId"));
+
+                    b.Property<string>("Option")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("VipId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Vips");
                 });
 
             modelBuilder.Entity("ChatUser", b =>
@@ -260,10 +310,32 @@ namespace SaleWebsite.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("SaleWebsite.Models.Premium", b =>
+                {
+                    b.HasOne("SaleWebsite.Models.Product", "Product")
+                        .WithMany("Premiums")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("SaleWebsite.Models.Product", b =>
                 {
                     b.HasOne("SaleWebsite.Models.User", "User")
                         .WithMany("Products")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SaleWebsite.Models.Vip", b =>
+                {
+                    b.HasOne("SaleWebsite.Models.User", "User")
+                        .WithMany("Vips")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -279,6 +351,8 @@ namespace SaleWebsite.Migrations
             modelBuilder.Entity("SaleWebsite.Models.Product", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("Premiums");
                 });
 
             modelBuilder.Entity("SaleWebsite.Models.User", b =>
@@ -288,6 +362,8 @@ namespace SaleWebsite.Migrations
                     b.Navigation("ReceiveMessages");
 
                     b.Navigation("SendMessages");
+
+                    b.Navigation("Vips");
                 });
 #pragma warning restore 612, 618
         }

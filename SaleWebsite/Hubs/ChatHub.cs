@@ -103,6 +103,21 @@ public class ChatHub : Hub
             await Task.CompletedTask; return;
         }
 
+        var updateMessages = _dataContext.ChatMessages
+        .Where(m => m.ChatId == chatId && m.ReceiverId == user.UserId && m.ViewStatus == "unread");
+
+        foreach (var message in updateMessages)
+        {
+            message.ViewStatus = "seen";
+            _dataContext.ChatMessages.Update(message);
+        }
+        await _dataContext.SaveChangesAsync();
+
+
+        await GetRecipients();
+
+
+
         var chatMessages = _dataContext.Chats
             .Where(c => c.Id == chatId)
             .Select(c => new
@@ -141,19 +156,6 @@ public class ChatHub : Hub
         
 
         await Clients.Client(Context.ConnectionId).SendAsync("GetMessages", chatMessages);
-        await Task.Delay(1000);
-        var updateMessages = _dataContext.ChatMessages
-        .Where(m => m.ChatId == chatId && m.ReceiverId == user.UserId && m.ViewStatus == "unread");
-
-        foreach (var message in updateMessages)
-        {
-            message.ViewStatus = "seen";
-            _dataContext.ChatMessages.Update(message);
-        }
-        await _dataContext.SaveChangesAsync();
-       
-
-        await GetRecipients();
     }
 
     #endregion
@@ -175,7 +177,7 @@ public class ChatHub : Hub
                 u.Name,
                 u.Surname,
                 u.Img,
-                Chats = (u.Chats ?? Enumerable.Empty<Chat>()).Select(c => new
+                Chats = u.Chats.Select(c => new
                 {
                     c.Id,
                     Participants = c.Participants
@@ -189,11 +191,11 @@ public class ChatHub : Hub
                             // Include other participant properties if needed
                         }),
                     UnreadMessagesCount = _dataContext.ChatMessages
-                        .Count(m => m.ReceiverId == user.UserId && m.ChatId == c.Id && m.ViewStatus == "unread")
+                        .Count(m => m.ReceiverId == user.UserId && m.ChatId == c.Id && m.ViewStatus == "unread"),
+                    LastMessage = c.ChatMessages.OrderByDescending(cm => cm.Timestamp).FirstOrDefault()
                 })
             })
             .FirstOrDefault();
-
 
         await Clients.Client(Context.ConnectionId).SendAsync("GetRecipients",userData);
     }

@@ -27,9 +27,9 @@ public class User
     [Required]
     public string Password { get; set; } = string.Empty;
 
-    // Define other user properties, e.g., Name, Address, etc.
+    public int IsAdmin { get; set; }
 
-    public bool IsAdmin { get; set; }
+    public ICollection<Vip>? Vips { get; set; }
     public ICollection<Product>? Products { get; set; }
 
     public ICollection<ChatMessage>? SendMessages { get; set; }

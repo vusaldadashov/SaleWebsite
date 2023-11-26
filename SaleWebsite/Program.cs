@@ -4,6 +4,7 @@ using SaleWebsite;
 using SaleWebsite.Hubs;
 using SaleWebsite.Interfaces;
 using SaleWebsite.PasswordHasher;
+using System.Xml.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,16 @@ builder.Services.AddSignalR(options =>
 
 builder.Services.AddDbContext<DataContext>(opt =>
     {
-        var ConStr = "SaleWebsiteDB";
-        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-        {
-            ConStr = "SaleWebsiteDBProd";
-        }
-        opt.UseSqlServer(builder.Configuration.GetConnectionString(ConStr));
+
+        
+        var DbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+        var DbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "SaleWebsiteDB";
+        var DbPassword = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "Vusal@12345";
+        var ConStr = $"Server={DbHost}, 1433;Database={DbName};User ID=SA;Password={DbPassword};TrustServerCertificate=True";
+        
+        opt.UseSqlServer(ConStr);
+        
+        //opt.UseSqlServer(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
     });
 
 //builder.Services.AddDistributedMemoryCache();

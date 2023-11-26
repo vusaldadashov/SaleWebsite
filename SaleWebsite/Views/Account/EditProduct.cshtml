@@ -1,6 +1,6 @@
 ﻿@model Product
 
-<div style="width: 70%; margin:auto">
+<div class="website_container">
     <form asp-controller="Account" asp-action="UpdateProduct" enctype="multipart/form-data" asp-route-Id="@Model.Id">
         <div class="form">
             <label class="form-label">Title</label>
@@ -45,6 +45,16 @@
                 <option>Poland</option>
                 <option>Azerbaijan</option>
                 <option>England</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Select Ads Period Date</label>
+            <select class="form-select" name="AdsOption">
+                <option value="0"><span class="text-primary">Basic Plan</span></option>
+                <option value="7"><span class="text-primary">7 Days</span> - <span class="text-danger">5$</span></option>
+                <option value="14"><span class="text-primary">14 Days</span> - <span class="text-danger">9$</span></option>
+                <option value="30"><span class="text-primary">30 Days</span> - <span class="text-danger">18$</span></option>
+                <option value="90"><span class="text-primary">90 Days</span> - <span class="text-danger">50$</span></option>
             </select>
         </div>
         <div id="edit_product_images" class="mt-2">

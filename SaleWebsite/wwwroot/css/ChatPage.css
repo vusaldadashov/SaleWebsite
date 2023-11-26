@@ -10,3 +10,8 @@
 #website_footer {
     display:none;
 }
+
+#ChatMessagesList {
+    background-color: gainsboro;
+
+}

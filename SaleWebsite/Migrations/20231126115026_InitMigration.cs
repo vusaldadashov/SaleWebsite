@@ -36,7 +36,7 @@ namespace SaleWebsite.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsAdmin = table.Column<bool>(type: "bit", nullable: false)
+                    IsAdmin = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -131,6 +131,27 @@ namespace SaleWebsite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Vips",
+                columns: table => new
+                {
+                    VipId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Option = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Vips", x => x.VipId);
+                    table.ForeignKey(
+                        name: "FK_Vips_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Images",
                 columns: table => new
                 {
@@ -144,6 +165,27 @@ namespace SaleWebsite.Migrations
                     table.PrimaryKey("PK_Images", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Images_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Premiums",
+                columns: table => new
+                {
+                    PremiumId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Option = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Premiums", x => x.PremiumId);
+                    table.ForeignKey(
+                        name: "FK_Premiums_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -171,6 +213,11 @@ namespace SaleWebsite.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Premiums_ProductId",
+                table: "Premiums",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Products_UserId",
                 table: "Products",
                 column: "UserId");
@@ -179,6 +226,11 @@ namespace SaleWebsite.Migrations
                 name: "IX_UserChat_ParticipantsUserId",
                 table: "UserChat",
                 column: "ParticipantsUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vips_UserId",
+                table: "Vips",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -191,7 +243,13 @@ namespace SaleWebsite.Migrations
                 name: "Images");
 
             migrationBuilder.DropTable(
+                name: "Premiums");
+
+            migrationBuilder.DropTable(
                 name: "UserChat");
+
+            migrationBuilder.DropTable(
+                name: "Vips");
 
             migrationBuilder.DropTable(
                 name: "Products");

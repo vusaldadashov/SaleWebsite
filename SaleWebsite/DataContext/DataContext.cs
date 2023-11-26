@@ -4,19 +4,23 @@ using SaleWebsite.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Net.Mail;
 using System.Net.Sockets;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace SaleWebsite
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
+        public DataContext(DbContextOptions<DataContext> options) : base(options) {}
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<Image> Images { get; set; }
 
         public DbSet<Chat> Chats { get; set; }
+        public DbSet<Vip> Vips { get; set; }
 
+        public DbSet<Premium> Premiums { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,6 +28,8 @@ namespace SaleWebsite
             modelBuilder.Entity<Product>().HasKey(p => p.Id);
             modelBuilder.Entity<Image>().HasKey(p => p.Id);
             modelBuilder.Entity<User>().HasKey(p => p.UserId);
+            modelBuilder.Entity<Premium>().HasKey(p => p.PremiumId);
+            modelBuilder.Entity<Vip>().HasKey(v => v.VipId);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Chats)
@@ -48,5 +54,6 @@ namespace SaleWebsite
                 .HasForeignKey(m => m.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
+
     }
 }

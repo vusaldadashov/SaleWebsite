@@ -20,11 +20,12 @@
 
         [Required]
         public int Price { get; set; }
-
         public ICollection<Image> Images { get; set; } = new List<Image>();
 
         [Required]
         public string Categories { get; set; } = string.Empty;
+
+        public ICollection<Premium>? Premiums { get; set; }
 
         [Required]
         public string Condition { get; set; } = string.Empty;

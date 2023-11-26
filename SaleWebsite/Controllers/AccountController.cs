@@ -29,7 +29,17 @@ public class AccountController : Controller
     #region Profile Page
     public IActionResult Profile()
     {
-        var user = HttpContext.Session.GetObjectFromJson<User>("user");
+        var userId = HttpContext?.Session?.GetObjectFromJson<User>("user")?.UserId;
+        var user = _dataContext.Users
+            .Include(u => u.ReceiveMessages)
+            .Include(u=> u.Vips)
+            .FirstOrDefault(u => u.UserId.Equals(userId));
+
+        user.ReceiveMessages = user.ReceiveMessages
+            .Where(m => m != null && m.ViewStatus == "unread")
+            .ToList();
+
+
         return View(user);
     }
 
@@ -39,6 +49,17 @@ public class AccountController : Controller
         if (userProfile == null)
         {
             return RedirectToAction("Login", "Register");
+        }
+        string MembershipOption = Request.Form["MembershipOption"].ToString();
+        if(int.Parse(MembershipOption) > 0)
+        {
+            Vip NewVip = new()
+            {
+                UserId = userProfile.UserId,
+                Option = MembershipOption,
+            };
+            _dataContext.Vips.Add(NewVip);
+            await _dataContext.SaveChangesAsync();
         }
         userProfile.Name = user.Name;
         userProfile.Surname = user.Surname;
@@ -74,6 +95,7 @@ public class AccountController : Controller
         }
         var products = await _dataContext.Products
             .Include(x => x.Images)
+            .Include(x=> x.Premiums)
             .Where(x => x.UserId == user.UserId)
             .ToListAsync();
         return View(products);
@@ -90,6 +112,7 @@ public class AccountController : Controller
         }
         var product = await _dataContext.Products
             .Include(x => x.Images)
+            .Include (x=> x.Premiums)
             .FirstOrDefaultAsync(x => x.Id == Int32.Parse(Id));
         return View(product);
     }
@@ -102,7 +125,7 @@ public class AccountController : Controller
     {
         var user = HttpContext.Session.GetObjectFromJson<User>("user");
         int productId = product.Id;
-
+        int AdsOption = int.Parse(Request.Form["AdsOption"].ToString());
         if (user == null)
         {
             return RedirectToAction("Login", "Register");
@@ -151,6 +174,17 @@ public class AccountController : Controller
             UpdatedProduct.Country = product.Country;
             UpdatedProduct.Condition = product.Condition;
             UpdatedProduct.Categories = product.Categories;
+            if (AdsOption > 0)
+            {
+                Premium NewPremium = new()
+                {
+                    Option = AdsOption.ToString(),
+                    ProductId = UpdatedProduct.Id
+                };
+                _dataContext.Premiums.Add(NewPremium);
+                await _dataContext.SaveChangesAsync();
+            }
+
 
             _dataContext.Products.Update(UpdatedProduct);
             await _dataContext.SaveChangesAsync();
@@ -207,6 +241,7 @@ public class AccountController : Controller
         }
 
         product.UserId = user.UserId;
+
         using var transaction = _dataContext.Database.BeginTransaction();
 
         try
@@ -276,7 +311,7 @@ public class AccountController : Controller
     public async Task<IActionResult> AddChatUser(int Id, int UserId)
     {
         var sessionUser = HttpContext.Session.GetObjectFromJson<User>("user");
-        if(sessionUser == null)
+        if (sessionUser == null)
         {
             HttpContext.Session.SetString("product_to_show", Id.ToString());
             return RedirectToAction("Login", "Register");
@@ -286,15 +321,15 @@ public class AccountController : Controller
 
 
 
-        if (user2 == null || user1 == null )
+        if (user2 == null || user1 == null)
         {
             return RedirectToAction("Product", "Home", new { id = Id });
         }
-        
-        var existChat = await  _dataContext.Chats
-            .FirstOrDefaultAsync(c => c.Participants.Any(p=> p.UserId == user1.UserId) &&
-                                       c.Participants.Any(p=> p.UserId == user2.UserId));
-        
+
+        var existChat = await _dataContext.Chats
+            .FirstOrDefaultAsync(c => c.Participants.Any(p => p.UserId == user1.UserId) &&
+                                       c.Participants.Any(p => p.UserId == user2.UserId));
+
         if (existChat == null)
             try
             {

@@ -100,3 +100,8 @@ body {
     overflow: hidden;
     border-radius: 50%;
 }
+
+.website_container {
+    width: 65%;
+    margin: auto;
+}
