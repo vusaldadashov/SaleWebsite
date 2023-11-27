@@ -27,10 +27,9 @@ builder.Services.AddDbContext<DataContext>(opt =>
 
         opt.UseSqlServer(ConStr);
         */
-        opt.UseSqlServer(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
+        //opt.UseSqlServer(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
 
-        // opt.UseSqlite(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
-       
+        opt.UseSqlite(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
     });
 //builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
