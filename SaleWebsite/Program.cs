@@ -19,19 +19,19 @@ builder.Services.AddSignalR(options =>
 builder.Services.AddDbContext<DataContext>(opt =>
     {
         /*
-        
+
         var DbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
         var DbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "SaleWebsiteDB";
         var DbPassword = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "Vusal@12345";
         var ConStr = $"Server={DbHost}, 1433;Database={DbName};User ID=SA;Password={DbPassword};TrustServerCertificate=True";
-        
+
         opt.UseSqlServer(ConStr);
         */
         //opt.UseSqlServer(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
 
-        opt.UseSqlite(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
+        // opt.UseSqlite(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
+        opt.UseSqlServer("Data Source=salewebsite.database.windows.net;Initial Catalog=SaleWebsiteDB;User ID=sa_;Password=Vusal@12345;Trust Server Certificate=True");
     });
-
 //builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
