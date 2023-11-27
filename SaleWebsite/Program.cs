@@ -27,10 +27,10 @@ builder.Services.AddDbContext<DataContext>(opt =>
 
         opt.UseSqlServer(ConStr);
         */
-        //opt.UseSqlServer(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
 
         // opt.UseSqlite(builder.Configuration.GetConnectionString("SaleWebsiteDB"));
-        opt.UseSqlServer("Data Source=salewebsite.database.windows.net;Initial Catalog=SaleWebsiteDB;User ID=sa_;Password=Vusal@12345;Trust Server Certificate=True");
+       
     });
 //builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
